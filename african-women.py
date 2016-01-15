@@ -66,8 +66,10 @@ def main():
             if personitem.claims:
                 if 'P18' in personitem.claims:
                     image = personitem.claims['P18'][0].getTarget()
-                    print('Image:', image)
-                    person['image'] = image
+                    if 'commons:' in image:
+                        image = image.split('commons:')[1].split(']]')[0]
+                        print('Image:', image)
+                        person['image'] = image
                 if 'P106' in personitem.claims:
                     ocitem = personitem.claims['P106'][0].getTarget()
                     ocitem.get()
@@ -96,7 +98,7 @@ def main():
     output += '! Name !! Occupation !! Birth !! Death !! Country !! Image\n'
     for person in people:
        interwiki = ', '.join(['[[:%s:%s|%s]]' % (k.split('wiki')[0], v, k.split('wiki')[0]) for k, v in person[2]["sitelinks"].items()])
-       output += '|-\n| [[%s]] <small>(%s)</small> || %s || %s || %s || [[%s]] || %s\n' % (person[1], interwiki, person[2]["occupation"] and person[2]["occupation"] or 'unknown', person[2]["birth"] and person[2]["birth"] or 'unknown', person[2]["death"] and person[2]["death"] or 'unknown', person[0], person[2]["image"] and '[[%s|100px]]' % person[2]["image"] or '-')
+       output += '|-\n| [[%s]] <small>(%s)</small> || %s || %s || %s || [[%s]] || %s\n' % (person[1], interwiki, person[2]["occupation"] and person[2]["occupation"] or 'unknown', person[2]["birth"] and person[2]["birth"] or 'unknown', person[2]["death"] and person[2]["death"] or 'unknown', person[0], person[2]["image"] and '[[%s|80px]]' % person[2]["image"] or '-')
     output += '|}\n'
     
     print(output)
