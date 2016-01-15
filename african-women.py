@@ -36,16 +36,19 @@ def main():
     print('Loaded',len(countryids),'countries')
     
     salir = False
+    skip = [b'Q142', b'Q29']
     for countryid in countryids:
         if salir:
             break
         
-        print('\n',countryid)
         countryitem = pywikibot.ItemPage(repo, countryid.decode("utf-8"))
         countryitem.get()
         if 'en' in countryitem.labels:
             countryname = countryitem.labels['en']
-            print('#'*50,'\n',countryname,'\n','#'*50,'\n')
+            print('#'*50,'\n',countryname,countryid,'\n','#'*50,'\n')
+        if countryid in skip:
+            print('Skiping...')
+            continue
         
         url2 = 'https://tools.wmflabs.org/autolist/index.php?language=en&project=wikipedia&category=&depth=12&wdq=claim[21%%3A6581072]%%20claim[27%%3A%s]&pagepile=&statementlist=&run=Run&mode_manual=or&mode_cat=or&mode_wdq=not&mode_find=or&chunk_size=10000&download=1' % (countryid.decode("utf-8")[1:])
         f = urllib.request.urlopen(url2)
