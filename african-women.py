@@ -37,15 +37,18 @@ def main():
     
     salir = False
     skip = [b'Q142', b'Q29']
+    localwiki = 'fr'
     for countryid in countryids:
         if salir:
             break
         
         countryitem = pywikibot.ItemPage(repo, countryid.decode("utf-8"))
         countryitem.get()
-        if 'en' in countryitem.labels:
+        if localwiki in countryitem.labels:
+            countryname = countryitem.labels[localwiki]
+        else:
             countryname = countryitem.labels['en']
-            print('#'*50,'\n',countryname,countryid,'\n','#'*50,'\n')
+        print('#'*50,'\n',countryname,countryid,'\n','#'*50,'\n')
         if countryid in skip:
             print('Skiping...')
             continue
@@ -59,8 +62,8 @@ def main():
             personitem = pywikibot.ItemPage(repo, personid.decode("utf-8"))
             personitem.get()
             
-            if 'en' in personitem.labels:
-                #print('It exists in English Wikipedia, skiping')
+            if localwiki in personitem.labels:
+                #print('It exists in this Wikipedia, skiping')
                 continue
             
             print(personitem.sitelinks)
@@ -79,8 +82,14 @@ def main():
                     ocitem = personitem.claims['P106'][0].getTarget()
                     try:
                         ocitem.get()
-                        print('Occupation:', ocitem.labels['en'])
-                        person['occupation'] = ocitem.labels['en']
+                        if localwiki in ocitem.labels:
+                            print('Occupation:', ocitem.labels[localwiki])
+                            person['occupation'] = ocitem.labels[localwiki]
+                        elif 'en' in ocitem.labels:
+                            print('Occupation:', ocitem.labels['en'])
+                            person['occupation'] = ocitem.labels['en']
+                        else:
+                            pass
                     except:
                         pass
                 if 'P569' in personitem.claims:
