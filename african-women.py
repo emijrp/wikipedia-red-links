@@ -62,6 +62,9 @@ def main():
             
             print(personitem.sitelinks)
             person['sitelinks'] = personitem.sitelinks
+            if not list(personitem.sitelinks.keys()):
+                continue
+            
             person['name'] = personitem.sitelinks[list(personitem.sitelinks.keys())[0]]
             if personitem.claims:
                 if 'P18' in personitem.claims:
