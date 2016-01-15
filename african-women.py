@@ -66,10 +66,9 @@ def main():
             if personitem.claims:
                 if 'P18' in personitem.claims:
                     image = personitem.claims['P18'][0].getTarget()
-                    if 'commons:' in image:
-                        image = image.split('commons:')[1].split(']]')[0]
-                        print('Image:', image)
-                        person['image'] = image
+                    if image.fileIsOnCommons():
+                        print('Image:', image.title())
+                        person['image'] = image.title()
                 if 'P106' in personitem.claims:
                     ocitem = personitem.claims['P106'][0].getTarget()
                     ocitem.get()
