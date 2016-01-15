@@ -71,9 +71,12 @@ def main():
                         person['image'] = image.title()
                 if 'P106' in personitem.claims:
                     ocitem = personitem.claims['P106'][0].getTarget()
-                    ocitem.get()
-                    print('Occupation:', ocitem.labels['en'])
-                    person['occupation'] = ocitem.labels['en']
+                    try:
+                        ocitem.get()
+                        print('Occupation:', ocitem.labels['en'])
+                        person['occupation'] = ocitem.labels['en']
+                    except:
+                        pass
                 if 'P569' in personitem.claims:
                     birth = personitem.claims['P569'][0].getTarget()
                     birthdate = '%04d-%02d-%02d' % (birth.year, birth.month, birth.day)
