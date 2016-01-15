@@ -82,16 +82,18 @@ def main():
                         pass
                 if 'P569' in personitem.claims:
                     birth = personitem.claims['P569'][0].getTarget()
-                    birthdate = '%04d-%02d-%02d' % (birth.year, birth.month, birth.day)
-                    if birthdate != '2000-01-01':
-                        print('Birth:', birthdate)
-                        person['birth'] = birthdate
+                    if birth:
+                        birthdate = '%04d-%02d-%02d' % (birth.year, birth.month, birth.day)
+                        if birthdate != '2000-01-01':
+                            print('Birth:', birthdate)
+                            person['birth'] = birthdate
                 if 'P570' in personitem.claims:
                     death = personitem.claims['P570'][0].getTarget()
-                    deathdate = '%04d-%02d-%02d' % (death.year, death.month, death.day)
-                    if deathdate != '2000-01-01':
-                        print('Death:', deathdate)
-                        person['death'] = deathdate
+                    if death:
+                        deathdate = '%04d-%02d-%02d' % (death.year, death.month, death.day)
+                        if deathdate != '2000-01-01':
+                            print('Death:', deathdate)
+                            person['death'] = deathdate
             people.append([countryname, person['name'], person])
             if limit > 0 and len(people) >= limit:
                 salir = True
