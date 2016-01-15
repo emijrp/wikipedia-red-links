@@ -17,9 +17,14 @@
 
 import pwb
 import pywikibot
+import sys
 import urllib
 
 def main():
+    limit = 0
+    if len(sys.argv) == 2:
+        limit = int(sys.argv[1])
+    
     site = pywikibot.Site('en', 'wikipedia')
     repo = site.data_repository()
     
@@ -81,18 +86,20 @@ def main():
                         print('Death:', deathdate)
                         person['death'] = deathdate
             people.append([countryname, person['name'], person])
-            if len(people) >= 10:
+            if limit > 0 and len(people) >= limit:
                 salir = True
                 break
     
     people.sort()
     output = '\n'*3
-    output += '{| class="wikitable sortable"'
-    output += '! Name !! Occupation !! Birth !! Death !! Country !! Image'
+    output += '{| class="wikitable sortable"\n'
+    output += '! Name !! Occupation !! Birth !! Death !! Country !! Image\n'
     for person in people:
        interwiki = ', '.join(['[[:%s:%s|%s]]' % (k.split('wiki')[0], v, k.split('wiki')[0]) for k, v in person[2]["sitelinks"].items()])
-       output += '|-\n| [[%s]] <small>(%s)</small> || %s || %s || %s || [[%s]] || %s' % (person[1], interwiki, person[2]["occupation"] and person[2]["occupation"] or 'unknown', person[2]["birth"] and person[2]["birth"] or 'unknown', person[2]["death"] and person[2]["death"] or 'unknown', person[0], person[2]["image"] and '[[%s|100px]]' % person[2]["image"] or '-')
-    output += '|}'
+       output += '|-\n| [[%s]] <small>(%s)</small> || %s || %s || %s || [[%s]] || %s\n' % (person[1], interwiki, person[2]["occupation"] and person[2]["occupation"] or 'unknown', person[2]["birth"] and person[2]["birth"] or 'unknown', person[2]["death"] and person[2]["death"] or 'unknown', person[0], person[2]["image"] and '[[%s|100px]]' % person[2]["image"] or '-')
+    output += '|}\n'
+    
+    print(output)
     
     f = open('missing-bios.txt', 'w')
     f.write(output)
