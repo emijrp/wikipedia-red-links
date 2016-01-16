@@ -132,7 +132,10 @@ def main():
                 salir = True
                 break
     
-    people.sort()
+    try:
+        people.sort()
+    except:
+        pass
     output = '\n'*3
     output += '{| class="wikitable sortable"\n'
     output += '! Name !! Occupation !! Birth !! Death !! Country !! Image !! Iw\n'
@@ -143,7 +146,7 @@ def main():
     
     print(output)
     
-    f = open('missing-bios.txt', 'w')
+    f = open('missing-bios-%s-%s.txt' % (localwiki.lower(), country.lower()), 'w')
     f.write(output)
     f.close()
 
