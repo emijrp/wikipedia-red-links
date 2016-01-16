@@ -72,11 +72,15 @@ def main():
         url2 = 'https://tools.wmflabs.org/autolist/index.php?language=en&project=wikipedia&category=&depth=12&wdq=claim[21%%3A6581072]%%20claim[27%%3A%s]&pagepile=&statementlist=&run=Run&mode_manual=or&mode_cat=or&mode_wdq=not&mode_find=or&chunk_size=%s&download=1' % (countryid.decode("utf-8")[1:], limit*2)
         f = urllib.request.urlopen(url2)
         personids = f.read().strip().splitlines()
+        print('AutoList returned',len(personids),'results')
         
         for personid in personids:
             person = {'q': '', 'name': '-', 'birth': '', 'death': '', 'occupation': [], 'image': '', 'commons': ''}
             personitem = pywikibot.ItemPage(repo, personid.decode("utf-8"))
-            personitem.get()
+            try:
+                personitem.get()
+            except:
+                continue
             
             if localwiki+'wiki' in personitem.sitelinks.keys():
                 print('\n',personid,'exists in',localwiki,'wiki, skiping',personitem.sitelinks)
@@ -136,7 +140,7 @@ def main():
         people.sort()
     except:
         pass
-    output = '\n'*3
+    output = '\n'
     output += '{| class="wikitable sortable"\n'
     output += '! Name !! Occupation !! Birth !! Death !! Country !! Image !! Iw\n'
     for person in people:
