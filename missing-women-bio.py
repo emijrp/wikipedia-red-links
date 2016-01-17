@@ -98,13 +98,15 @@ def main():
                 person['sitelinks'].pop('commonswiki')
             if not list(person['sitelinks'].keys()):
                 continue
+            person['sitelinks'] = [[k, v] for k, v in person['sitelinks'].items()]
+            person['sitelinks'].sort()
             print('\n',person['sitelinks'])
             
             person['q'] = personid
-            person['name'] = personitem.sitelinks[list(person['sitelinks'].keys())[0]]
-            for k in list(person['sitelinks'].keys()): #we prefer names in latin chars
-                if not re.search(r'(?im)[a-z]', person['name']) and re.search(r'(?im)[a-z]', k):
-                    person['name'] = k
+            person['name'] = person['sitelinks'][0][1]
+            for k, v in person['sitelinks']: #we prefer names in latin chars
+                if (not re.search(r'(?im)[a-z]', person['name']) or re.search(r'(?im)\(\)', person['name'])) and (re.search(r'(?im)[a-z]', v) and not re.search(r'(?im)\(\)', v)):
+                    person['name'] = v
             
             if personitem.claims:
                 if 'P18' in personitem.claims:
@@ -179,7 +181,7 @@ def main():
             else:
                 output[i] += headercountry
         
-        interwiki = ', '.join(['[[:%s:%s|%s]]' % (k.split('wiki')[0], v, k.split('wiki')[0]) for k, v in person[2]["sitelinks"].items()])
+        interwiki = ', '.join(['[[:%s:%s|%s]]' % (k.split('wiki')[0], v, k.split('wiki')[0]) for k, v in person[2]["sitelinks"]])
         
         if country.lower() == 'africa':
             output[i] += '|-\n| %s || [[%s]] <small>(%s)</small> || %s || %s || %s || [[%s]] || %s%s || [[:d:%s|%s]]\n' % (c, person[1], interwiki, person[2]["occupation"] and ', '.join(person[2]["occupation"]) or 'unknown', person[2]["birth"] and person[2]["birth"] or 'unknown', person[2]["death"] and person[2]["death"] or '-', person[0], person[2]["image"] and '[[%s|80px]]' % person[2]["image"] or '-', person[2]['commons'] and '<br/>[[:commons:%s|Commons]]' % person[2]['commons'], person[2]['q'].decode("utf-8"), len(person[2]['sitelinks']))
