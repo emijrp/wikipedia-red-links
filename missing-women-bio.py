@@ -197,17 +197,23 @@ def main():
     
     #save in wiki
     ensite = pywikibot.Site('en', 'wikipedia')
+    country2 = re.sub(r'_', ' ', country[0].upper()+country[1:])
     if len(output) == 1:
-        page = pywikibot.Page(ensite, 'User:Emijrp/sandbox')
-        page.text = '{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/header|1=%s}}\n\n%s\n\n{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/footer}}' % (country, output[0])
-        page.save(u'table')
+        page = pywikibot.Page(ensite, 'Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/%s' % (country2))
+        page.text = '{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/header|1=%s}}\n\n%s\n\n{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/footer}}' % (country2, output[0])
+        page.save(u'BOT - Updating table')
     else:
         c = 1
+        outputindex = ''
         for outputsplit in output:
-            page = pywikibot.Page(ensite, 'User:Emijrp/sandbox')
-            page.text = '{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/header|1=%s|2=%s}}\n\n%s\n\n{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/footer}}' % (country, c, outputsplit)
-            page.save(u'table')
+            page = pywikibot.Page(ensite, 'Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/%s/%s' % (country2, c))
+            page.text = '{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/header|1=%s|2=%s}}\n\n%s\n\n{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/footer}}' % (country2, c, outputsplit)
+            page.save(u'BOT - Updating table')
+            outputindex += '* [[Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/%s/%s|%s/%s]] (%s articles)\n' % (country2, c, country2, c, len(re.search(r'\|-', outputsplit)))
             c += 1
+        pageindex = pywikibot.Page(ensite, 'Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/%s' % (country2))
+        pageindex.text = '{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/header|1=%s}}\n\n%s\n\n{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/footer}}' % (country2, outputindex)
+        pageindex.save(u'BOT - Updating index')
 
 if __name__ == '__main__':
     main()
