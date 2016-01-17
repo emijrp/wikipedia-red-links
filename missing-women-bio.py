@@ -17,8 +17,14 @@
 
 import pwb
 import pywikibot
+import re
 import sys
 import urllib
+
+def convertOccupation(oc):
+    if oc.lower() == 'actor':
+        return 'actress'
+    return oc
 
 def main():
     limit = 0
@@ -95,7 +101,11 @@ def main():
             print('\n',person['sitelinks'])
             
             person['q'] = personid
-            person['name'] = personitem.sitelinks[list(personitem.sitelinks.keys())[0]]
+            person['name'] = personitem.sitelinks[list(person['sitelinks'].keys())[0]]
+            for k in list(person['sitelinks'].keys()): #we prefer names in latin chars
+                if not re.search(r'(?im)[a-z]', person['name']) and re.search(r'(?im)[a-z]', k):
+                    person['name'] = k
+            
             if personitem.claims:
                 if 'P18' in personitem.claims:
                     image = personitem.claims['P18'][0].getTarget()
@@ -108,11 +118,13 @@ def main():
                         try:
                             ocitem.get()
                             if localwiki in ocitem.labels:
-                                print('Occupation:', ocitem.labels[localwiki])
-                                person['occupation'].append(ocitem.labels[localwiki])
+                                oc = convertOccupation(ocitem.labels[localwiki])
+                                print('Occupation:', oc)
+                                person['occupation'].append(oc)
                             elif 'en' in ocitem.labels:
-                                print('Occupation:', ocitem.labels['en'])
-                                person['occupation'].append(ocitem.labels['en'])
+                                oc = convertOccupation(ocitem.labels['en'])
+                                print('Occupation:', oc)
+                                person['occupation'].append(oc)
                             else:
                                 pass
                         except:
@@ -140,19 +152,62 @@ def main():
         people.sort()
     except:
         pass
-    output = '\n'
-    output += '{| class="wikitable sortable"\n'
-    output += '! Name !! Occupation !! Birth !! Death !! Country !! Image !! Iw\n'
+    headercontinent = '! # !! Name !! Occupation !! Birth !! Death !! Country !! Image !! Iw\n'
+    headercountry = '! # !! Name !! Occupation !! Birth !! Death !! Image !! Iw\n'
+    tablebegin = '{| class="wikitable sortable"\n'
+    tableend = '|}'
+    output = ['', ]
+    i = 0
+    output[i] = tablebegin
+    
+    if country.lower() == 'africa':
+        output[i] += headercontinent
+    else:
+        output[i] += headercountry
+    
+    c = 0
+    tablelimit = 1000
     for person in people:
-       interwiki = ', '.join(['[[:%s:%s|%s]]' % (k.split('wiki')[0], v, k.split('wiki')[0]) for k, v in person[2]["sitelinks"].items()])
-       output += '|-\n| [[%s]] <small>(%s)</small> || %s || %s || %s || [[%s]] || %s%s || [[:d:%s|%s]]\n' % (person[1], interwiki, person[2]["occupation"] and ', '.join(person[2]["occupation"]) or 'unknown', person[2]["birth"] and person[2]["birth"] or 'unknown', person[2]["death"] and person[2]["death"] or 'unknown', person[0], person[2]["image"] and '[[%s|80px]]' % person[2]["image"] or '-', person[2]['commons'] and '<br/>[[:commons:%s|Commons]]' % person[2]['commons'], person[2]['q'].decode("utf-8"), len(person[2]['sitelinks']))
-    output += '|}\n'
+        c += 1
+        if c >= tablelimit and c % tablelimit == 1:
+            output[i] += tableend
+            i += 1
+            output.append('')
+            output[i] = tablebegin
+            if country.lower() == 'africa':
+                output[i] += headercontinent
+            else:
+                output[i] += headercountry
+        
+        interwiki = ', '.join(['[[:%s:%s|%s]]' % (k.split('wiki')[0], v, k.split('wiki')[0]) for k, v in person[2]["sitelinks"].items()])
+        
+        if country.lower() == 'africa':
+            output[i] += '|-\n| %s || [[%s]] <small>(%s)</small> || %s || %s || %s || [[%s]] || %s%s || [[:d:%s|%s]]\n' % (c, person[1], interwiki, person[2]["occupation"] and ', '.join(person[2]["occupation"]) or 'unknown', person[2]["birth"] and person[2]["birth"] or 'unknown', person[2]["death"] and person[2]["death"] or '-', person[0], person[2]["image"] and '[[%s|80px]]' % person[2]["image"] or '-', person[2]['commons'] and '<br/>[[:commons:%s|Commons]]' % person[2]['commons'], person[2]['q'].decode("utf-8"), len(person[2]['sitelinks']))
+        else:
+            output[i] += '|-\n| %s || [[%s]] <small>(%s)</small> || %s || %s || %s || %s%s || [[:d:%s|%s]]\n' % (c, person[1], interwiki, person[2]["occupation"] and ', '.join(person[2]["occupation"]) or 'unknown', person[2]["birth"] and person[2]["birth"] or 'unknown', person[2]["death"] and person[2]["death"] or '-', person[2]["image"] and '[[%s|80px]]' % person[2]["image"] or '-', person[2]['commons'] and '<br/>[[:commons:%s|Commons]]' % person[2]['commons'], person[2]['q'].decode("utf-8"), len(person[2]['sitelinks']))
     
-    print(output)
+    output[i] += tableend
+    print('\n'.join(output))
+    print('Found',len(people),'missing biographies')
     
+    #save in file
     f = open('missing-bios-%s-%s.txt' % (localwiki.lower(), country.lower()), 'w')
-    f.write(output)
+    f.write('\n'.join(output))
     f.close()
+    
+    #save in wiki
+    ensite = pywikibot.Site('en', 'wikipedia')
+    if len(output) == 1:
+        page = pywikibot.Page(ensite, 'User:Emijrp/sandbox')
+        page.text = '{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/header|1=%s}}\n\n%s\n\n{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/footer}}' % (country, output[0])
+        page.save(u'table')
+    else:
+        c = 1
+        for outputsplit in output:
+            page = pywikibot.Page(ensite, 'User:Emijrp/sandbox')
+            page.text = '{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/header|1=%s|2=%s}}\n\n%s\n\n{{Wikipedia:WikiProject Women/Women in Red/Missing articles by nationality/footer}}' % (country, c, outputsplit)
+            page.save(u'table')
+            c += 1
 
 if __name__ == '__main__':
     main()
