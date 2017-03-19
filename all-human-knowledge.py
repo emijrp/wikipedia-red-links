@@ -1,3 +1,6 @@
+# This script is deprecated
+# New one: https://github.com/emijrp/wikidata/blob/master/all.human.knowledge.py
+
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
