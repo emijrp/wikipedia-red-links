@@ -1,4 +1,3 @@
-wikipedia-red-links
-===================
+# wikipedia-red-links
 
-Wikipedia red links
+Wikipedia red links.
